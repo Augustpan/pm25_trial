@@ -38,8 +38,13 @@ effect = spread(biomarker_data, date, PGF) %>%
   inner_join(pm, by=c("subject", "stage")) %>%
   mutate(treatment = (stage=="stage1"&sequence=="A")|(stage=="stage2"&sequence=="B"))
 
-fit = lmer(delta ~ pm25 + stage + treatment + (1|subject), data=effect)
+# 线性混合效应模型
+lmer(delta ~ pm25 + stage + treatment + (1|subject), data=effect) %>% summary()
 
-aov(delta ~ subject + stage + treatment, data=effect)
+# 交叉设计方差分析
+## 做正态、方差齐检验！
+aov(delta ~ subject + stage + treatment, data=effect) %>% summary()
 
-lm(delta ~ pm25 + stage, data = effect %>% filter(treatment==T))
+# 分对照和处理看PM2.5的效应
+lm(delta ~ pm25 + stage, data = effect %>% filter(treatment==T)) %>% summary()
+lm(delta ~ pm25 + stage, data = effect %>% filter(treatment==F)) %>% summary()
