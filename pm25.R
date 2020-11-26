@@ -42,5 +42,5 @@ for (i in 1:length(sp)) {
 }
 
 pm_data$date = NULL
-
+pm_data$pm25[pm_data$pm25>1000] = NA
 save(pm_data, file="data/pm_data.RData")

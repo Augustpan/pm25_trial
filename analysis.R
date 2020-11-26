@@ -60,6 +60,9 @@ plot_effect_size = ggplot(summ, aes(x=term, y=estimate)) +
 
 ggsave("result/effect_size.jpg", plot=plot_effect_size)
 
+# 混杂控制
+
+
 # 配对T检验，看处理前后有没有差异
 temp = effect %>% 
   select(subject, sequence, stage, delta) %>% 
@@ -74,7 +77,7 @@ s2 = c(xa$stage2, xb$stage1)
 
 tdf = bind_rows(tibble(delta=s1, group="Treatment"), tibble(delta=s2, group="Control"))
 
-t.test(s1, s2, paired = T)
+tt = t.test(s1, s2, paired = T)
 
 plot_t_test = ggplot(tdf, aes(x=group, y=delta)) + 
   geom_boxplot() + 

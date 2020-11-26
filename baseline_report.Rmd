@@ -1,0 +1,134 @@
+---
+title: "Baseline Descriptive Statistics"
+author: "Yuanfei Pan"
+date: "11/26/2020"
+output: html_document
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggpubr)
+
+load("data/pm_data.RData")
+baseline = read_csv("data/baseline.csv")
+```
+
+# 年龄
+```{r warning=FALSE}
+baseline$dob = as.Date(baseline$dob, "%Y/%m/%d") %>% as.POSIXct()
+baseline$age = difftime(Sys.time(), baseline$dob, units = "days") / 365
+
+mean(as.double(baseline$age))
+sd(baseline$age) / sqrt(29)
+```
+
+# 性别
+- 1 = 男
+- 2 = 女
+```{r}
+table(baseline$sex)
+```
+
+# 运动次数
+- 1 = 锻炼>1次/周
+- 2 = 锻炼<1次/周
+```{r}
+table(baseline$exercise_frequency)
+```
+
+# 运动强度
+- -2 = 未填写
+- 1 = 低强度运动
+- 2 = 中等强度运动
+- 3 = 高强度运动
+```{r}
+table(baseline$exercise_intensity)
+```
+
+# 过敏情况
+- 0 = 有过敏
+- 1 = 无过敏
+```{r}
+table(baseline$allergy_none)
+```
+
+# 过敏性疾病
+- 0 = 有过敏性疾病
+- 1 = 无过敏性疾病
+```{r}
+table(baseline$allergic_disease)
+```
+
+# 出校次数
+```{r}
+baseline$out = baseline$out_mon + 
+  baseline$out_tue +
+  baseline$out_wen +
+  baseline$out_thu +
+  baseline$out_fri +
+  baseline$out_sat +
+  baseline$out_sun
+table(baseline$out)
+```
+
+# 保健品
+- 0 = 吃保健品
+- 1 = 不吃保健品
+```{r}
+table(baseline$healthfood_none)
+```
+
+# 喝茶
+- 1 = 喝茶
+- 2 = 不喝
+```{r}
+table(baseline$tea)
+```
+
+# 饮酒
+- 1 = 喝酒
+- 2 = 不喝
+```{r}
+table(baseline$alchohol)
+```
+
+# 咖啡
+- 1 = 喝咖啡
+- 2 = 不喝
+```{r}
+table(baseline$coffe)
+```
+
+# 吸烟
+- 1 = 吸烟
+- 2 = 不吸烟
+```{r}
+table(baseline$smoke)
+```
+
+# 被动吸烟
+- 1 = 被动吸烟
+- 2 = 无被动吸烟
+```{r}
+table(baseline$smoke_passive)
+```
+
+# 用药
+- 1 = 有用药史
+- 2 = 无用药史
+```{r}
+table(baseline$drug)
+```
+
+# PM2.5个体暴露
+```{r}
+summary(pm_data$pm25)
+qplot(pm_data$pm25, bins=60) + 
+  xlab("PM2.5 ug/m3") + 
+  ylab("Frequency") + 
+  theme_pubr()
+qplot(log(pm_data$pm25), bins=60) + 
+  xlab("ln(PM2.5)") + 
+  ylab("Frequency") + 
+  theme_pubr()
+```
