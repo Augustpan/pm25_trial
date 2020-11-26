@@ -1,5 +1,10 @@
 library(tidyverse)
 library(lme4)
+library(broom)
+library(ggpubr)
+
+source("std_curve.R")
+source("pm25.R")
 
 # 定义一个计算平均PM2.5浓度的函数
 calc_average = function(df, doi, lag) {
@@ -38,13 +43,56 @@ effect = spread(biomarker_data, date, PGF) %>%
   inner_join(pm, by=c("subject", "stage")) %>%
   mutate(treatment = (stage=="stage1"&sequence=="A")|(stage=="stage2"&sequence=="B"))
 
-# 线性混合效应模型
-lmer(delta ~ pm25 + stage + treatment + (1|subject), data=effect) %>% summary()
+# 分对照和处理看PM2.5的效应
+fit_trt = lm(delta ~ pm25 + stage, data = effect %>% filter(treatment==T))
+fit_crtl = lm(delta ~ pm25 + stage, data = effect %>% filter(treatment==F))
+
+summ = bind_rows(tidy(fit_trt)[2,], tidy(fit_crtl)[2,])
+summ$term = c("Treatment", "Control")
+
+plot_effect_size = ggplot(summ, aes(x=term, y=estimate)) + 
+  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=.1) +
+  geom_point() + 
+  geom_hline(aes(yintercept=0), linetype="dashed") + 
+  ylab("Estimated effect of PM2.5") +
+  xlab("") + 
+  theme_pubr()
+
+ggsave("result/effect_size.jpg", plot=plot_effect_size)
+
+# 配对T检验，看处理前后有没有差异
+temp = effect %>% 
+  select(subject, sequence, stage, delta) %>% 
+  spread(stage, delta) %>%
+  na.omit()
+
+xa = temp %>% filter(sequence=="A")
+xb = temp %>% filter(sequence=="B")
+
+s1 = c(xa$stage1, xb$stage2)
+s2 = c(xa$stage2, xb$stage1)
+
+tdf = bind_rows(tibble(delta=s1, group="Treatment"), tibble(delta=s2, group="Control"))
+
+t.test(s1, s2, paired = T)
+
+plot_t_test = ggplot(tdf, aes(x=group, y=delta)) + 
+  geom_boxplot() + 
+  geom_jitter() + 
+  geom_text(x=1.9, y= 120, label=paste0("paired t test p = ",(round(tt$p.value*10000)/10000))) + 
+  xlab("") + 
+  ylab("Change in uric 8-iso PGF") + 
+  theme_pubr()
+
+ggsave("result/t_test.jpg", plot=plot_t_test)
 
 # 交叉设计方差分析
 ## 做正态、方差齐检验！
-aov(delta ~ subject + stage + treatment, data=effect) %>% summary()
+r_anova = aov(delta ~ subject + stage + treatment, data=effect)
+write_csv(tidy(r_anova), "result/anova.csv")
 
-# 分对照和处理看PM2.5的效应
-lm(delta ~ pm25 + stage, data = effect %>% filter(treatment==T)) %>% summary()
-lm(delta ~ pm25 + stage, data = effect %>% filter(treatment==F)) %>% summary()
+# 线性混合效应模型
+fit1 = lmer(delta ~ stage + treatment + (1|subject), data=effect)
+fit2 = lmer(delta ~ stage + treatment + pm25 + (1|subject), data=effect)
+fit3 = lmer(delta ~ stage + treatment + (pm25|treatment) + (1|subject), data=effect)
+anova(fit1, fit2, fit3)
