@@ -19,6 +19,9 @@ calc_average = function(df, doi, lag) {
 load("data/pm_data.RData")
 biomarker_data = read_csv("data/biomaker.csv")
 meta_data = read_csv("data/metadata.csv")
+baseline = read_csv("data/baseline.csv")
+baseline$dob = as.Date(baseline$dob, "%Y/%m/%d") %>% as.POSIXct()
+baseline$age = difftime(Sys.time(), baseline$dob, units = "days") / 365
 
 # 两个实验阶段结束日期
 doi1 = strptime("20-11-8 08-00", "%y-%m-%d %H-%M")
@@ -41,17 +44,27 @@ effect = spread(biomarker_data, date, PGF) %>%
   inner_join(meta_data, by="subject") %>% 
   gather("stage", "delta", 2:3) %>%
   inner_join(pm, by=c("subject", "stage")) %>%
-  mutate(treatment = (stage=="stage1"&sequence=="A")|(stage=="stage2"&sequence=="B"))
+  mutate(treatment = (stage=="stage1"&sequence=="A")|(stage=="stage2"&sequence=="B")) %>%
+  inner_join(baseline, by="subject")
+
+# 对两阶段实验后8-iso变化绘图
+plot_delta = qplot(x=stage,y=delta,data=effect, geom="boxplot") + 
+  facet_wrap(~sequence) + 
+  xlab("") + 
+  ylab("Change in uric 8-iso PGF") +
+  theme_pubr()
+ggsave("result/delta.jpg", plot=plot_delta)
 
 # 分对照和处理看PM2.5的效应
-fit_trt = lm(delta ~ pm25 + stage, data = effect %>% filter(treatment==T))
-fit_crtl = lm(delta ~ pm25 + stage, data = effect %>% filter(treatment==F))
+fit_trt = lm(delta ~ pm25, data = effect %>% filter(treatment==T))
+fit_crtl = lm(delta ~ pm25, data = effect %>% filter(treatment==F))
 
 summ = bind_rows(tidy(fit_trt)[2,], tidy(fit_crtl)[2,])
 summ$term = c("Treatment", "Control")
+write_csv(summ, "result/effect.csv")
 
 plot_effect_size = ggplot(summ, aes(x=term, y=estimate)) + 
-  geom_errorbar(aes(ymin=estimate-std.error, ymax=estimate+std.error), width=.1) +
+  geom_errorbar(aes(ymin=estimate-std.error*1.96, ymax=estimate+std.error*1.96), width=.1) +
   geom_point() + 
   geom_hline(aes(yintercept=0), linetype="dashed") + 
   ylab("Estimated effect of PM2.5") +
@@ -61,7 +74,22 @@ plot_effect_size = ggplot(summ, aes(x=term, y=estimate)) +
 ggsave("result/effect_size.jpg", plot=plot_effect_size)
 
 # 混杂控制
+fit_trt = lm(delta ~ pm25 + stage + age + sex + pm10 + allergic_disease, data = effect %>% filter(treatment==T))
+fit_crtl = lm(delta ~ pm25 + stage + age + sex + pm10 + allergic_disease, data = effect %>% filter(treatment==F))
 
+summ = bind_rows(tidy(fit_trt)[2,], tidy(fit_crtl)[2,])
+summ$term = c("Treatment", "Control")
+write_csv(summ, "result/effect_adj.csv")
+
+plot_effect_size = ggplot(summ, aes(x=term, y=estimate)) + 
+  geom_errorbar(aes(ymin=estimate-std.error*1.96, ymax=estimate+std.error*1.96), width=.1) +
+  geom_point() + 
+  geom_hline(aes(yintercept=0), linetype="dashed") + 
+  ylab("Estimated effect of PM2.5") +
+  xlab("") + 
+  theme_pubr()
+
+ggsave("result/effect_size_adj.jpg", plot=plot_effect_size)
 
 # 配对T检验，看处理前后有没有差异
 temp = effect %>% 
@@ -93,9 +121,3 @@ ggsave("result/t_test.jpg", plot=plot_t_test)
 ## 做正态、方差齐检验！
 r_anova = aov(delta ~ subject + stage + treatment, data=effect)
 write_csv(tidy(r_anova), "result/anova.csv")
-
-# 线性混合效应模型
-fit1 = lmer(delta ~ stage + treatment + (1|subject), data=effect)
-fit2 = lmer(delta ~ stage + treatment + pm25 + (1|subject), data=effect)
-fit3 = lmer(delta ~ stage + treatment + (pm25|treatment) + (1|subject), data=effect)
-anova(fit1, fit2, fit3)

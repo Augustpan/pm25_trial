@@ -19,6 +19,7 @@
 	- result/anova.csv：交叉设计方差分析
 	- result/effect_size.jpg：PM2.5效应的组间差异
 	- result/t_test.jpg：交叉设计配对t检验
+	- result/delta.jpg：实验效应
 - baseline_report.Rmd：基线数据、暴露数据的描述性统计。生成如下结果文件：
 	- baseline_report.html
 

@@ -11,6 +11,8 @@ library(ggpubr)
 
 load("data/pm_data.RData")
 baseline = read_csv("data/baseline.csv")
+biomarker_data = read_csv("data/biomaker.csv")
+meta_data = read_csv("data/metadata.csv")
 ```
 
 # 年龄
@@ -132,3 +134,17 @@ qplot(log(pm_data$pm25), bins=60) +
   ylab("Frequency") + 
   theme_pubr()
 ```
+
+# PGF
+```{r}
+# PGF浓度均值绘图
+tdf = biomarker_data %>%
+  inner_join(meta_data, by="subject")
+
+qplot(x=date, y=PGF, geom="boxplot", data=tdf) + 
+  facet_wrap(~sequence) + 
+  xlab("Date") + 
+  ylab("Uric 8-iso PGF") + 
+  theme_classic()
+```
+
