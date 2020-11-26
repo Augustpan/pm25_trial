@@ -17,9 +17,13 @@
 	- data/pm_data.RData：所有实验对象的PM2.5暴露数据
 - analysis.R：主要的分析过程在此进行。生成如下结果文件：
 	- result/anova.csv：交叉设计方差分析
-	- result/effect_size.jpg：PM2.5效应的组间差异
+	- result/effect.csv：PM2.5效应的估计值（未控制混杂）
+	- result/effect_adj.csv：PM2.5效应的估计值（控制混杂）
+	- result/effect_size.jpg：PM2.5效应的组间差异（未控制混杂）
+	- result/effect_size_adj.jpg：PM2.5效应的组间差异（控制混杂）
 	- result/t_test.jpg：交叉设计配对t检验
 	- result/delta.jpg：实验效应
+	- 
 - baseline_report.Rmd：基线数据、暴露数据的描述性统计。生成如下结果文件：
 	- baseline_report.html
 
