@@ -28,7 +28,7 @@ fit_AC = lm(log(c_std)~x_AC) %>% summary()
 ### 如下绘制AC两组的标准曲线
 plot_AC = ggplot() + 
   geom_point(aes(x=x_AC, y=log(c_std))) + 
-  geom_smooth(aes(x=x_AC, y=log(c_std)), method="lm", se=F) + 
+  geom_smooth(aes(x=x_AC, y=log(c_std)), method="lm", se=F, color="black") + 
   geom_text(aes(hjust=0, x=0.6, y=4.5, label=paste0("R-square=", round(fit_AC$r.squared*10000)/10000))) + 
   geom_text(aes(hjust=0, x=0.6, y=4.7, label=paste0("ln(y) = ", round(fit_AC$coefficients[1]*10000)/10000, " + ", round(fit_AC$coefficients[2]*10000)/10000, " * x"
   ))) + 
@@ -39,7 +39,7 @@ plot_AC = ggplot() +
 ### 如下绘制B组的标准曲线
 plot_B = ggplot() + 
   geom_point(aes(x=x_B, y=log(c_std))) + 
-  geom_smooth(aes(x=x_B, y=log(c_std)), method="lm", se=F) + 
+  geom_smooth(aes(x=x_B, y=log(c_std)), method="lm", se=F, color="black") + 
   geom_text(aes(hjust=0, x=1, y=4.5, label=paste0("R-square=", round(fit_B$r.squared*10000)/10000))) + 
   geom_text(aes(hjust=0, x=1, y=4.7, label=paste0("ln(y) = ", round(fit_B$coefficients[1]*10000)/10000, " + ", round(fit_AC$coefficients[2]*10000)/10000, " * x"
   ))) + 
