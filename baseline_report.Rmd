@@ -124,6 +124,7 @@ table(baseline$drug)
 
 # PM2.5个体暴露
 ```{r}
+exp(mean(log(na.omit(pm_data$pm25)+1)))-1
 summary(pm_data$pm25)
 qplot(pm_data$pm25, bins=60) + 
   xlab("PM2.5 ug/m3") + 

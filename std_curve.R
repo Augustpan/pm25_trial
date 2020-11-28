@@ -4,6 +4,7 @@
 # 2. 各实验对象尿样的8-iso浓度表（包括三个小组全部样品），data文件夹下的biomarker.csv
 
 library(tidyverse)
+library(ggpubr)
 
 # PART0 原始数据
 ## 标准管浓度
@@ -29,32 +30,34 @@ fit_AC = lm(log(c_std)~x_AC) %>% summary()
 plot_AC = ggplot() + 
   geom_point(aes(x=x_AC, y=log(c_std))) + 
   geom_smooth(aes(x=x_AC, y=log(c_std)), method="lm", se=F, color="black") + 
-  geom_text(aes(hjust=0, x=0.6, y=4.5, label=paste0("R-square=", round(fit_AC$r.squared*10000)/10000))) + 
-  geom_text(aes(hjust=0, x=0.6, y=4.7, label=paste0("ln(y) = ", round(fit_AC$coefficients[1]*10000)/10000, " + ", round(fit_AC$coefficients[2]*10000)/10000, " * x"
+  geom_text(aes(hjust=0, x=0.3, y=4.5, label=paste0("R-square=", round(fit_AC$r.squared*10000)/10000))) + 
+  geom_text(aes(hjust=0, x=0.3, y=4.7, label=paste0("ln(y) = ", round(fit_AC$coefficients[1]*10000)/10000, " + ", round(fit_AC$coefficients[2]*10000)/10000, " * x"
   ))) + 
   xlab("O.D.") + 
   ylab("ln(8-iso)") + 
-  ggpubr::theme_pubr()
+  ylim(c(4,7)) +
+  theme_pubr()
 
 ### 如下绘制B组的标准曲线
 plot_B = ggplot() + 
   geom_point(aes(x=x_B, y=log(c_std))) + 
   geom_smooth(aes(x=x_B, y=log(c_std)), method="lm", se=F, color="black") + 
-  geom_text(aes(hjust=0, x=1, y=4.5, label=paste0("R-square=", round(fit_B$r.squared*10000)/10000))) + 
-  geom_text(aes(hjust=0, x=1, y=4.7, label=paste0("ln(y) = ", round(fit_B$coefficients[1]*10000)/10000, " + ", round(fit_AC$coefficients[2]*10000)/10000, " * x"
+  geom_text(aes(hjust=0, x=0.74, y=4.5, label=paste0("R-square=", round(fit_B$r.squared*10000)/10000))) + 
+  geom_text(aes(hjust=0, x=0.74, y=4.7, label=paste0("ln(y) = ", round(fit_B$coefficients[1]*10000)/10000, " + ", round(fit_AC$coefficients[2]*10000)/10000, " * x"
   ))) + 
   xlab("O.D.") + 
   ylab("ln(8-iso)") + 
-  ggpubr::theme_pubr()
+  ylim(c(4,7)) +
+  theme_pubr()
 
 ### 保存绘图结果
-ggsave("result/std_curve_AC.jpg", plot=plot_AC)
-ggsave("result/std_curve_B.jpg", plot=plot_B)
+ggsave("result/std_curve_AC.jpg", width=4, height=3, plot=plot_AC)
+ggsave("result/std_curve_B.jpg", width=4, height=3, plot=plot_B)
 
 # PART3 根据标准曲线，计算样品浓度
 ## 分别读取AC组、B组样品样品吸光度原始数据
-raw_AC = read_csv("data/raw_8isoPGF_group_AC.csv")
-raw_B = read_csv("data/raw_8isoPGF_group_B.csv")
+raw_AC = read_csv("data/raw_8isoprostane_group_AC.csv")
+raw_B = read_csv("data/raw_8isoprostane_group_B.csv")
 
 ## 计算样品中8-iso浓度
 raw_AC$PGF = exp(raw_AC$OD * fit_AC$coefficients[2] + fit_AC$coefficients[1])

@@ -2,6 +2,7 @@ library(tidyverse)
 library(lme4)
 library(broom)
 library(ggpubr)
+library(latex2exp)
 
 source("std_curve.R")
 source("pm25.R")
@@ -49,11 +50,11 @@ effect = spread(biomarker_data, date, PGF) %>%
 
 # 对两阶段实验后8-iso变化绘图
 plot_delta = qplot(x=stage,y=delta,data=effect, geom="boxplot") + 
-  facet_wrap(~sequence) + 
+  facet_wrap(~paste0("Group ", sequence)) + 
   xlab("") + 
-  ylab("Change in uric 8-iso PGF") +
+  ylab('Change in uric 8-isoprostane (ng/L)') +
   theme_pubr()
-ggsave("result/delta.jpg", plot=plot_delta)
+ggsave("result/delta.jpg", width=4, height=3, plot=plot_delta)
 
 # 分对照和处理看PM2.5的效应
 fit_trt = lm(delta ~ pm25, data = effect %>% filter(treatment==T))
@@ -85,11 +86,11 @@ plot_effect_size = ggplot(summ, aes(x=term, y=estimate)) +
   geom_errorbar(aes(ymin=estimate-std.error*1.96, ymax=estimate+std.error*1.96), width=.1) +
   geom_point() + 
   geom_hline(aes(yintercept=0), linetype="dashed") + 
-  ylab("Estimated effect of PM2.5") +
+  ylab(TeX("Estimated effect of $PM_{2.5}$")) +
   xlab("") + 
   theme_pubr()
 
-ggsave("result/effect_size_adj.jpg", plot=plot_effect_size)
+ggsave("result/effect_size_adj.jpg", width=4, height=3, plot=plot_effect_size)
 
 # 配对T检验，看处理前后有没有差异
 temp = effect %>% 
@@ -109,13 +110,12 @@ tt = t.test(s1, s2, paired = T)
 
 plot_t_test = ggplot(tdf, aes(x=group, y=delta)) + 
   geom_boxplot() + 
-  geom_jitter() + 
   geom_text(x=1.9, y= 120, label=paste0("paired t test p = ",(round(tt$p.value*10000)/10000))) + 
   xlab("") + 
-  ylab("Change in uric 8-iso PGF") + 
+  ylab("Change in uric 8-isoprostane ng/L") + 
   theme_pubr()
 
-ggsave("result/t_test.jpg", plot=plot_t_test)
+ggsave("result/t_test.jpg", width=4, height=3, plot=plot_t_test)
 
 # 交叉设计方差分析
 ## 做正态、方差齐检验！

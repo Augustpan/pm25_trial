@@ -23,7 +23,9 @@
 	- result/effect_size_adj.jpg：PM2.5效应的组间差异（控制混杂）
 	- result/t_test.jpg：交叉设计配对t检验
 	- result/delta.jpg：实验效应
-	- 
+- pm25_lag_effect.R：分析了1天、2天、4天平均PM2.5暴露对结果的可能影响
+	- effect_size_adj_lag.jpg
+	- effect_lag.csv
 - baseline_report.Rmd：基线数据、暴露数据的描述性统计。生成如下结果文件：
 	- baseline_report.html
 
