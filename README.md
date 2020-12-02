@@ -8,8 +8,8 @@
 
 ## 数据
 - data/baseline.csv：基线调查数据（只选取部分数据）
-- data/raw_8isoPGF_group_AC.csv：A、C组尿8-isoPGF吸光度原始数据
-- data/raw_8isoPGF_group_B.csv：B组尿8-isoPGF吸光度原始数据
+- data/raw_8isoprostane_group_AC.csv：A、C组尿8-isoPGF吸光度原始数据
+- data/raw_8isoprostane_group_B.csv：B组尿8-isoPGF吸光度原始数据
 - data/metadata.csv：分组情况（先运动、后运动组）
 - data/PM2.5/*.txt：PM2.5个体暴露原始数据
 
